@@ -1,0 +1,21 @@
+backup_date: 2026-05-09
+source_path: C:\Users\Murat Başar\Documents\Codex\ULS-Turizm-Operasyon-ANA
+archive_name: uls-turizm-operasyon-source-backup-20260509-gnc.zip
+archive_encoding: base64 text
+archive_scope:
+- app.py
+- ops_app/
+- static/
+- scripts/
+- tests/ (temporary sqlite test outputs excluded from file content)
+- deploy/google-cloud/ (deploy-config.env excluded)
+- root runtime and export files
+excluded:
+- data/
+- .venv/
+- .codex-backups/
+- secrets/cookies/logs
+- local backups and upload archives
+notes:
+- public GitHub repo oldugu icin yalnizca temiz kaynak yedegi yuklendi.
+- Cloud Run duzeltmeleri ve vehicle document arsivi degisiklikleri dahildir.
