@@ -1,0 +1,4 @@
+ULS Turizm source backup
+Created: 2026-05-12 21:37:02
+Included: app.py, ops_app/, static/, deploy/, scripts/, tests/*.py, root docs and startup scripts
+Excluded: .venv, .codex-backups, data/, cookies, secret txt files, logs, temp html/js, backup zips, generated test sqlite files
