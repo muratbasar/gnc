@@ -15,6 +15,7 @@ gcloud config set project "$PROJECT_ID"
 gcloud services enable \
   aiplatform.googleapis.com \
   artifactregistry.googleapis.com \
+  cloudbuild.googleapis.com \
   cloudscheduler.googleapis.com \
   firestore.googleapis.com \
   run.googleapis.com \
