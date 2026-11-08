@@ -1,0 +1,5 @@
+social-publisher/node_modules/
+social-publisher/dist/
+social-publisher/coverage/
+social-publisher/.env
+*.log

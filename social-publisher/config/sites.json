@@ -1,0 +1,37 @@
+[
+  {
+    "id": "ephesus-ancient-city",
+    "name": "Ephesus Ancient City",
+    "url": "https://ephesusancientcity.com/",
+    "language": "en",
+    "canvaTemplateId": null
+  },
+  {
+    "id": "creaos-travel",
+    "name": "Creaos Travel",
+    "url": "https://creaostravel.com/en/",
+    "language": "en",
+    "canvaTemplateId": null
+  },
+  {
+    "id": "turkiye-tour",
+    "name": "Türkiye Tour",
+    "url": "https://turkiye-tour.com/en/",
+    "language": "en",
+    "canvaTemplateId": null
+  },
+  {
+    "id": "biblical-tours-turkey",
+    "name": "Biblical Tours Turkey",
+    "url": "https://biblicaltours-turkey.com/",
+    "language": "en",
+    "canvaTemplateId": null
+  },
+  {
+    "id": "ephesus-city-tours",
+    "name": "Ephesus City Tours",
+    "url": "https://ephesuscity-tours.com/",
+    "language": "en",
+    "canvaTemplateId": null
+  }
+]
