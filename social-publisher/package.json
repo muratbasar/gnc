@@ -1,0 +1,40 @@
+{
+  "name": "social-publisher",
+  "version": "1.0.0",
+  "description": "Open-source, serverless social media publishing service for Google Cloud Run.",
+  "type": "module",
+  "main": "dist/server.js",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "account:add": "tsx scripts/upsert-account.ts",
+    "dev": "tsx watch src/server.ts",
+    "start": "node dist/server.js",
+    "test": "vitest run",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "keywords": [
+    "social-media",
+    "cloud-run",
+    "open-source"
+  ],
+  "overrides": {
+    "glob": "14.0.4",
+    "minimatch": "11.0.5",
+    "rimraf": "6.1.4"
+  },
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@google-cloud/firestore": "^9.4.0",
+    "@google-cloud/secret-manager": "^7.2.0",
+    "fastify": "^5.12.8",
+    "google-auth-library": "^11.3.3",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.6",
+    "tsx": "^4.23.15",
+    "typescript": "^7.0.2",
+    "vitest": "^5.1.0"
+  }
+}
