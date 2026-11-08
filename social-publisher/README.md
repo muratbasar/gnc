@@ -144,6 +144,56 @@ Git'e eklemeyin veya sohbet içinde paylaşmayın.
 Canva OAuth verisini varsayılan olarak `canva-oauth` adlı secret'a kaydedin.
 Farklı ad için Cloud Run'a `CANVA_SECRET_ID` ortam değişkeni verin.
 
+### Canva'yı ilk kez bağlama
+
+Canva Developer Portal'da REST API izinlerini açın:
+
+- `asset`: Read + Write
+- `brandtemplate:content`: Read
+- `brandtemplate:meta`: Read
+- `design:content`: Read + Write
+- `design:meta`: Read
+
+Google Cloud Console → Secret Manager içinde `canva-oauth-client` adında bir
+secret oluşturun. Değeri şu JSON biçiminde olmalıdır:
+
+```json
+{
+  "clientSecret": "CANVA_CLIENT_SECRET",
+  "setupKey": "AT_LEAST_32_RANDOM_CHARACTERS"
+}
+```
+
+`setupKey` değerini `openssl rand -base64 48` ile üretin. Bu değer ve Client
+Secret sohbet, Git veya uygulama loglarına yazılmamalıdır.
+
+Dağıtım sırasında Client ID'yi verin:
+
+```bash
+export PROJECT_ID="your-project-id"
+export CANVA_CLIENT_ID="your-canva-client-id"
+./scripts/deploy-gcp.sh
+```
+
+Betik sonunda `Canva redirect URL` değerini yazdırır. Canva Developer Portal →
+Outside Canva → Redirect URLs alanındaki geçici localhost adresini bu gerçek
+HTTPS adresiyle değiştirin.
+
+Bir kez yetkilendirme bağlantısı üretin:
+
+```bash
+read -s CANVA_SETUP_KEY
+curl -H "Authorization: Bearer ${CANVA_SETUP_KEY}" \
+  "https://YOUR-OAUTH-SERVICE/oauth/canva/start"
+unset CANVA_SETUP_KEY
+```
+
+Dönen `authorizationUrl` adresini tarayıcıda açıp Canva hesabını onaylayın.
+Callback kısa ömürlü PKCE state kullanır ve dönen access/refresh tokenlarını
+`canva-oauth` secret'ına yazar. Canva refresh tokenları tek kullanımlık olduğu
+için servis her yenilemede yeni tokenı Secret Manager'a yeni sürüm olarak
+kaydeder.
+
 ## Sosyal hesap ekleme
 
 Önce ilgili OAuth secret'ını Secret Manager'da oluşturun. Ardından hesabı

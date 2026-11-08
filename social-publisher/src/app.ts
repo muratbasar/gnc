@@ -1,6 +1,6 @@
 import { Firestore } from "@google-cloud/firestore";
 import { SecretManagerServiceClient } from "@google-cloud/secret-manager";
-import Fastify from "fastify";
+import Fastify, { type FastifyInstance } from "fastify";
 import { z, ZodError } from "zod";
 import { CanvaTemplateRenderer } from "./canva.js";
 import type { AppConfig } from "./config.js";
@@ -8,6 +8,7 @@ import { DailyGenerator } from "./daily.js";
 import { Dispatcher } from "./dispatcher.js";
 import { createPublicationSchema } from "./domain.js";
 import { VertexContentGenerator } from "./generation.js";
+import { registerCanvaOAuth } from "./oauth.js";
 import { createPublishers } from "./publishers.js";
 import { loadSites } from "./sites.js";
 import { SiteSourceReader } from "./source.js";
@@ -38,9 +39,58 @@ export async function buildApp(config: AppConfig) {
     databaseId: config.FIRESTORE_DATABASE,
     ignoreUndefinedProperties: true,
   });
+  const secretManager = new SecretManagerServiceClient();
+
+  app.get("/health", async () => ({ mode: config.SERVICE_MODE, status: "ok" }));
+
+  if (config.SERVICE_MODE === "oauth") {
+    if (!config.CANVA_CLIENT_ID || !config.OAUTH_REDIRECT_URI) {
+      throw new Error(
+        "CANVA_CLIENT_ID and OAUTH_REDIRECT_URI are required in oauth mode",
+      );
+    }
+    registerCanvaOAuth(app, firestore, secretManager, {
+      clientId: config.CANVA_CLIENT_ID,
+      clientSecretId: config.CANVA_CLIENT_SECRET_ID,
+      projectId: config.GOOGLE_CLOUD_PROJECT,
+      redirectUri: config.OAUTH_REDIRECT_URI,
+      tokenSecretId: config.CANVA_SECRET_ID,
+    });
+  } else {
+    registerPublisherRoutes(
+      app,
+      config,
+      firestore,
+      secretManager,
+    );
+  }
+
+  app.setErrorHandler((error, request, reply) => {
+    if (error instanceof ZodError) {
+      return reply.code(400).send({
+        error: "Invalid request",
+        issues: error.issues.map((issue) => ({
+          path: issue.path.join("."),
+          message: issue.message,
+        })),
+      });
+    }
+    request.log.error({ err: error }, "request failed");
+    return reply.code(500).send({ error: "Internal server error" });
+  });
+
+  return app;
+}
+
+async function registerPublisherRoutes(
+  app: FastifyInstance,
+  config: AppConfig,
+  firestore: Firestore,
+  secretManager: SecretManagerServiceClient,
+) {
   const accountStore = new AccountStore(firestore);
   const credentialStore = new CredentialStore(
-    new SecretManagerServiceClient(),
+    secretManager,
     config.GOOGLE_CLOUD_PROJECT,
   );
   const jobStore = new JobStore(firestore);
@@ -67,8 +117,6 @@ export async function buildApp(config: AppConfig) {
     config.CANVA_SECRET_ID,
   );
 
-  app.get("/health", async () => ({ status: "ok" }));
-
   app.post("/v1/publications", async (request, reply) => {
     const input = createPublicationSchema.parse(request.body);
     await accountStore.assertForSite(input.accountIds, input.siteId);
@@ -91,20 +139,4 @@ export async function buildApp(config: AppConfig) {
       return job;
     },
   );
-
-  app.setErrorHandler((error, request, reply) => {
-    if (error instanceof ZodError) {
-      return reply.code(400).send({
-        error: "Invalid request",
-        issues: error.issues.map((issue) => ({
-          path: issue.path.join("."),
-          message: issue.message,
-        })),
-      });
-    }
-    request.log.error({ err: error }, "request failed");
-    return reply.code(500).send({ error: "Internal server error" });
-  });
-
-  return app;
 }
